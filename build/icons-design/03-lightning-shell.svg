@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a0a"/>
+      <stop offset="100%" stop-color="#1a1a1a"/>
+    </linearGradient>
+    <linearGradient id="bolt3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bbf7d0"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <filter id="glow3">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="96" fill="url(#bg3)"/>
+
+  <!-- 终端窗口 -->
+  <g>
+    <!-- 窗口主体 -->
+    <rect x="68" y="120" width="376" height="280" rx="20"
+          fill="#000" stroke="#10b981" stroke-width="6"/>
+    <!-- 顶部栏 -->
+    <rect x="68" y="120" width="376" height="46" rx="20" fill="#10b981"/>
+    <rect x="68" y="148" width="376" height="18" fill="#10b981"/>
+    <!-- 三个圆点 -->
+    <circle cx="98" cy="143" r="8" fill="#0a0a0a"/>
+    <circle cx="124" cy="143" r="8" fill="#0a0a0a"/>
+    <circle cx="150" cy="143" r="8" fill="#0a0a0a"/>
+  </g>
+
+  <!-- 闪电符号（占终端中央） -->
+  <g filter="url(#glow3)">
+    <path d="M 270 190 L 200 290 L 250 290 L 222 360 L 320 250 L 268 250 L 296 190 Z"
+          fill="url(#bolt3)" stroke="#86efac" stroke-width="3" stroke-linejoin="round"/>
+  </g>
+
+  <!-- 提示符 $_ -->
+  <g fill="#10b981" font-family="'Consolas','Cascadia Mono',monospace" font-size="32" font-weight="700">
+    <text x="100" y="220">$</text>
+    <rect x="130" y="200" width="20" height="24" fill="#10b981" opacity="0.7">
+      <animate attributeName="opacity" values="0.7;0.1;0.7" dur="1s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+</svg>

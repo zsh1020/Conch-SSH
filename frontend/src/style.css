@@ -1,0 +1,196 @@
+@import "@xterm/xterm/css/xterm.css";
+
+/* ── Roboto Mono (内置可变字体，支持 100–700 所有字重) ── */
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('./assets/fonts/RobotoMono-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Roboto Mono';
+  src: url('./assets/fonts/RobotoMono-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 700;
+  font-style: italic;
+  font-display: block;
+}
+
+/* ── IBM Plex Sans / Mono（设计系统字体，latin 子集，本地打包）── */
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 400; font-style: normal; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 500; font-style: normal; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 600; font-style: normal; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 700; font-style: normal; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-sans-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; font-style: normal; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; font-style: normal; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 600; font-style: normal; font-display: swap;
+  src: url('./assets/fonts/ibm-plex-mono-latin-600-normal.woff2') format('woff2'); }
+
+/* ── Dark theme (default) ── */
+:root,
+[data-theme="dark"] {
+  --bg-primary:   #0f151d;
+  --bg-secondary: #141a22;
+  --bg-panel:     #111721;
+  --accent:       #34c8d4;
+  --accent-hover: #4dd6e0;
+  --border:       #30363d;
+  --text-primary: #e6edf3;
+  --text-muted:   #8b949e;
+  --danger:       #f85149;
+  --success:      #3fb950;
+
+  /* ── 设计系统令牌（默认 = Conch 方案；applyColorScheme 会按所选方案动态覆盖）── */
+  --accent-soft: rgba(52, 200, 212, 0.14);
+  --panel:       #141a22;
+  --panel-2:     #111721;
+  --term:        #0b0e13;
+  --line:        #212a35;
+  --line-soft:   rgba(255, 255, 255, 0.05);
+  --hover:       rgba(255, 255, 255, 0.055);
+  --tp:          #d7dee7;
+  --ts:          #8c99a8;
+  --tm:          #5b6775;
+  /* 语义色（跨方案常量）*/
+  --green: #46cf8b;
+  --amber: #ecb44a;
+  --red:   #ef6d6d;
+  --blue:  #5aa2fb;
+  --gold:  #d3a75a;
+
+  /* Terminal colors — --term-bg 由 JS applyColorScheme 动态设置 */
+  --term-fg:      #e6edf3;
+  --term-cursor:  #e6edf3;
+  --term-sel:     rgba(88, 166, 255, 0.3);
+}
+
+/* ── Light theme ── */
+[data-theme="light"] {
+  --bg-primary:   #f6f8fa;
+  --bg-secondary: #ffffff;
+  --bg-panel:     #ffffff;
+  --accent:       #0969da;
+  --accent-hover: #0550ae;
+  --border:       #d0d7de;
+  --text-primary: #1f2328;
+  --text-muted:   #57606a;
+  --danger:       #d1242f;
+  --success:      #1a7f37;
+
+  /* Terminal colors (keep dark for readability) */
+  --term-fg:      #d4d4d4;
+  --term-cursor:  #d4d4d4;
+  --term-sel:     rgba(38, 79, 120, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #app {
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+body {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.xterm {
+  height: 100%;
+  padding: 4px;
+}
+
+.xterm-viewport {
+  overflow-y: auto !important;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+input, select, textarea {
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  padding: 6px 10px;
+  font-size: 13px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s;
+}
+
+input:focus, select:focus {
+  border-color: var(--accent);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  padding: 7px 14px;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid transparent;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgba(248, 81, 73, 0.12);
+}
+
+/* ─── 覆盖 xterm.js 内置硬编码黑色 ─── */
+/* xterm.css 中 .xterm-viewport 默认 background-color: #000;
+   切换浅色配色方案时会露出黑色，改为透明让父级 .terminal-container 的动态背景透出 */
+.xterm-viewport {
+  background-color: transparent !important;
+}
+
+.xterm .composition-view {
+  background: transparent !important;
+}

@@ -1,0 +1,33 @@
+# Build output
+build/bin/
+
+# Go
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/wailsjs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Claude Code 工作目录（本地配置 + 临时工作树）
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 发布产物（用 GitHub Releases 分发，不入库）
+dist/*/*.zip
+
+# 设计交接稿（含内网示例信息，仅本地保留）
+design_handoff_conch_ui/

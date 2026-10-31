@@ -1,0 +1,20 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "conch",
+  "outputfilename": "conch",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "xt_zsh@163.com",
+    "email": "xt_zsh@163.com"
+  },
+  "info": {
+    "companyName": "xt_zsh",
+    "productName": "Conch",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright © 2026 xt_zsh",
+    "comments": "Every shell, in one shell."
+  }
+}

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>gssh 图标方案预览</title>
+<style>
+  body {
+    margin: 0;
+    padding: 40px;
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+  }
+  h1 { margin: 0 0 8px; font-weight: 700; }
+  p.intro { color: #8b949e; margin: 0 0 32px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+  }
+  .card h3 {
+    margin: 0 0 4px;
+    color: #58a6ff;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+  .card p { margin: 0 0 16px; color: #8b949e; font-size: 12px; }
+  .sizes {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 16px;
+    padding: 16px 0;
+    background: #0d1117;
+    border-radius: 8px;
+  }
+  .sizes img { display: block; }
+  .label {
+    font-size: 10px;
+    color: #6e7681;
+    margin-top: 4px;
+  }
+  .size-wrap { display: flex; flex-direction: column; align-items: center; }
+</style>
+</head>
+<body>
+  <h1>gssh — 图标方案预览（v1.6.0）</h1>
+  <p class="intro">6 套不同风格的 SVG 矢量图标，可缩放至任意尺寸。选定后用工具转 .ico 替换 <code>build/windows/icon.ico</code>。</p>
+
+  <div class="grid">
+    <div class="card">
+      <h3>方案 1 · Hexagon Terminal</h3>
+      <p>六边形 + 终端提示符，科技盾牌风</p>
+      <div class="sizes">
+        <div class="size-wrap"><img src="01-hexagon-terminal.svg" width="32"  height="32"><div class="label">32</div></div>
+        <div class="size-wrap"><img src="01-hexagon-terminal.svg" width="64"  height="64"><div class="label">64</div></div>
+        <div class="size-wrap"><img src="01-hexagon-terminal.svg" width="128" height="128"><div class="label">128</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>方案 2 · Gradient G Bracket</h3>
+      <p>字母 G + 尖括号，紫粉橙渐变</p>
+      <div class="sizes">
+        <div class="size-wrap"><img src="02-gradient-g-bracket.svg" width="32"  height="32"><div class="label">32</div></div>
+        <div class="size-wrap"><img src="02-gradient-g-bracket.svg" width="64"  height="64"><div class="label">64</div></div>
+        <div class="size-wrap"><img src="02-gradient-g-bracket.svg" width="128" height="128"><div class="label">128</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>方案 3 · Lightning Shell</h3>
+      <p>终端窗口 + 闪电，黑客风</p>
+      <div class="sizes">
+        <div class="size-wrap"><img src="03-lightning-shell.svg" width="32"  height="32"><div class="label">32</div></div>
+        <div class="size-wrap"><img src="03-lightning-shell.svg" width="64"  height="64"><div class="label">64</div></div>
+        <div class="size-wrap"><img src="03-lightning-shell.svg" width="128" height="128"><div class="label">128</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>方案 4 · Globe Wire</h3>
+      <p>地球 + 连接节点，远程连接意象</p>
+      <div class="sizes">
+        <div class="size-wrap"><img src="04-globe-wire.svg" width="32"  height="32"><div class="label">32</div></div>
+        <div class="size-wrap"><img src="04-globe-wire.svg" width="64"  height="64"><div class="label">64</div></div>
+        <div class="size-wrap"><img src="04-globe-wire.svg" width="128" height="128"><div class="label">128</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>方案 5 · Layered G</h3>
+      <p>极简扁平 G + 光标下划线，橙红渐变</p>
+      <div class="sizes">
+        <div class="size-wrap"><img src="05-layered-g.svg" width="32"  height="32"><div class="label">32</div></div>
+        <div class="size-wrap"><img src="05-layered-g.svg" width="64"  height="64"><div class="label">64</div></div>
+        <div class="size-wrap"><img src="05-layered-g.svg" width="128" height="128"><div class="label">128</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>方案 6 · Shield Prompt</h3>
+      <p>盾牌 + 提示符，安全色金紫调</p>
+      <div class="sizes">
+        <div class="size-wrap"><img src="06-shield-prompt.svg" width="32"  height="32"><div class="label">32</div></div>
+        <div class="size-wrap"><img src="06-shield-prompt.svg" width="64"  height="64"><div class="label">64</div></div>
+        <div class="size-wrap"><img src="06-shield-prompt.svg" width="128" height="128"><div class="label">128</div></div>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top:40px;color:#6e7681;font-size:12px">
+    转 .ico 工具推荐：<a href="https://convertio.co/svg-ico/" style="color:#58a6ff">convertio.co</a> ·
+    <a href="https://cloudconvert.com/svg-to-ico" style="color:#58a6ff">cloudconvert.com</a>
+    （建议同时打包 16/32/48/64/128/256 多尺寸到一个 ico）
+  </p>
+</body>
+</html>

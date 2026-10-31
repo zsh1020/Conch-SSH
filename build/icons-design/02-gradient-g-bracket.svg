@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="50%" stop-color="#ec4899"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="bg2-dark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#3b0764"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 圆角背景 -->
+  <rect width="512" height="512" rx="96" fill="url(#bg2-dark)"/>
+
+  <!-- 渐变光晕背景圆 -->
+  <circle cx="256" cy="256" r="200" fill="url(#bg2)" opacity="0.18"/>
+
+  <!-- 左尖括号 < -->
+  <polyline points="120,176 64,256 120,336"
+            fill="none" stroke="url(#bg2)" stroke-width="26"
+            stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- 字母 g （加粗几何风） -->
+  <g fill="none" stroke="#fff" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+    <!-- 上半圆 -->
+    <path d="M 320 220 A 60 60 0 1 0 320 320 L 320 220"/>
+    <!-- 下尾 -->
+    <path d="M 320 320 L 320 380 A 50 40 0 0 1 220 380"/>
+  </g>
+
+  <!-- 右尖括号 > -->
+  <polyline points="392,176 448,256 392,336"
+            fill="none" stroke="url(#bg2)" stroke-width="26"
+            stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
