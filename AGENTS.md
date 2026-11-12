@@ -15,6 +15,7 @@
 |------|------|
 | `app.go` | App 结构体、NewApp、startup/beforeClose、getConn/removeConn |
 | `app_session.go` | ConnectRequest + Connect/SendInput/Resize/Disconnect |
+| `app_serial.go` + `backend/serial/` | 串口枚举/连接（复用终端输出通道，无 PTY/SFTP/监控/隧道） |
 | `app_sftp.go` | getSFTP（懒加载）+ 全部 SFTPxxx 方法 + makeProgressFn |
 | `app_editor.go` | OpenWithEditor/UploadEditedFile/StopEditorWatch + 目录对话框 |
 | `app_monitor.go` | StartMonitor/StopMonitor |

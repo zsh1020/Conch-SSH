@@ -3,7 +3,7 @@
     <span class="bc-label">广播:</span>
     <div class="bc-targets">
       <label
-        v-for="tab in tabsStore.tabs"
+        v-for="tab in tabsStore.tabs.filter(t => t.kind !== 'serial')"
         :key="tab.connId"
         class="bc-check"
       >
@@ -42,7 +42,7 @@ const broadcastTargets = ref<string[]>([])
 watch(() => props.modelValue, (on) => {
   if (on) {
     broadcastTargets.value = tabsStore.tabs
-      .filter(t => t.status === 'connected')
+      .filter(t => t.status === 'connected' && t.kind !== 'serial')
       .map(t => t.connId)
   }
 })

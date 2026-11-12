@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { Disconnect } from '../../wailsjs/go/main/App'
 
 export type TabStatus = 'connecting' | 'connected' | 'closed' | 'reconnecting'
+export type TabKind = 'ssh' | 'serial'
 
 export interface ConnectRequest {
   session_id?: string
@@ -14,6 +15,14 @@ export interface ConnectRequest {
   identity_file?: string
 }
 
+export interface SerialConnectRequest {
+  port: string
+  baud_rate: number
+  data_bits: number
+  parity: string
+  stop_bits: string
+}
+
 export interface Tab {
   connId: string
   sessionId?: string
@@ -21,7 +30,9 @@ export interface Tab {
   status: TabStatus
   color: string                    // 会话标识色，由 sessionId hash 决定
   hasNewOutput: boolean            // 非活跃时有新输出
+  kind: TabKind                    // ssh / serial（串口会话无 SFTP/监控/隧道）
   lastConnectReq?: ConnectRequest  // for reconnect
+  lastSerialReq?: SerialConnectRequest // 串口会话的重连参数
   reconnectCount?: number
   reconnectAt?: number             // epoch ms when next auto-reconnect fires
   manualClose?: boolean            // true when user explicitly closed the tab
@@ -50,9 +61,9 @@ export const useTabsStore = defineStore('tabs', () => {
 
   const activeTab = computed(() => tabs.value.find(t => t.connId === activeConnId.value))
 
-  function openTab(connId: string, label: string, sessionId?: string, req?: ConnectRequest) {
+  function openTab(connId: string, label: string, sessionId?: string, req?: ConnectRequest, kind: TabKind = 'ssh', serialReq?: SerialConnectRequest) {
     const color = pickColor(sessionId, label)
-    tabs.value.push({ connId, label, sessionId, status: 'connected', color, hasNewOutput: false, lastConnectReq: req })
+    tabs.value.push({ connId, label, sessionId, status: 'connected', color, hasNewOutput: false, kind, lastConnectReq: req, lastSerialReq: serialReq })
     activeConnId.value = connId
   }
 

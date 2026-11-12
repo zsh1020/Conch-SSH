@@ -81,7 +81,7 @@
 |:------:|------|------|
 | P0 | **插件架构 (WebAssembly 沙箱)** | 三方开发者用 Rust / TypeScript 编写插件，内置插件市场 |
 | P0 | **配置多设备同步** | 本地加密文件 + 用户自选云存储（WebDAV / S3 / Git）端到端加密 |
-| P1 | **协议扩展** | Telnet / Serial（串口）/ Mosh（移动 SSH）/ 远端 RDP 桥接 |
+| P1 | **协议扩展** | Telnet / ~~Serial（串口）~~（已提前实现，见 `app_serial.go`）/ Mosh（移动 SSH）/ 远端 RDP 桥接 |
 | P1 | **内置 AI 助手** | 命令补全 / 报错诊断 / SQL 生成；可选模型（OpenAI / Anthropic / 本地 Ollama）|
 | P2 | **团队会话共享** | 加密 URL 形式分享会话配置（不含密码），团队批量导入 |
 

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	appconfig "conch/backend/config"
+	serialbackend "conch/backend/serial"
 	sftpbackend "conch/backend/sftp"
 	sshbackend "conch/backend/ssh"
 	"conch/backend/store"
@@ -44,6 +45,9 @@ type connEntry struct {
 	sftpMu     sync.Mutex
 	tunnels    *tunnelbackend.Manager
 	sessionID  string // empty for ad-hoc connections without a saved session
+
+	// 串口会话（非 nil 时 client/session/sshConn/tunnels 均为 nil）
+	serial *serialbackend.Session
 
 	// 首次 sudo 提权成功后缓存的密码（仅内存），避免每次保存重复询问
 	sudoPassword string
@@ -87,6 +91,15 @@ func (a *App) startup(ctx context.Context) {
 // It persists the current window geometry so the next launch restores it.
 func (a *App) beforeClose(ctx context.Context) (prevent bool) {
 	a.StopAllLocalTerms()
+	// 关闭所有串口会话，避免退出后串口被占用
+	a.connMu.Lock()
+	for id, entry := range a.connections {
+		if entry.serial != nil {
+			entry.serial.Close()
+			delete(a.connections, id)
+		}
+	}
+	a.connMu.Unlock()
 	s := appconfig.Get()
 	s.WindowMaximized = runtime.WindowIsMaximised(ctx)
 	if !s.WindowMaximized {

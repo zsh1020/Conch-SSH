@@ -12,6 +12,7 @@
       <div class="tb-spring"></div>
       <div class="title-actions" style="--wails-draggable: no-drag">
         <button class="tb-btn" title="新建连接 (Ctrl+T)" @click="openNewSession"><i class="ph ph-plus"></i></button>
+        <button class="tb-btn" title="串口连接" @click="showSerialDialog = true"><i class="ph ph-usb"></i></button>
         <button class="tb-btn" title="快捷键速查" @click="showHelp = !showHelp"><i class="ph ph-question"></i></button>
         <button class="tb-btn" title="设置" @click="showSettings = true"><i class="ph ph-gear-six"></i></button>
       </div>
@@ -32,10 +33,10 @@
     <!-- ─── 内容区（文件列 + 主区域 + 侧边栏） ────────────────── -->
     <div class="content-area">
 
-      <!-- 文件面板列（仅在有标签时显示，全高度） -->
-      <div v-if="tabsStore.tabs.length > 0" class="file-column" :style="{ width: filePanelWidth + 'px' }">
+      <!-- 文件面板列（仅在有标签且当前非串口会话时显示，全高度） -->
+      <div v-if="showFilePanel" class="file-column" :style="{ width: filePanelWidth + 'px' }">
         <template v-for="tab in tabsStore.tabs" :key="tab.connId + '-fm'">
-          <div v-show="tab.connId === tabsStore.activeConnId" class="file-column-slot">
+          <div v-if="tab.kind !== 'serial'" v-show="tab.connId === tabsStore.activeConnId" class="file-column-slot">
             <FileManager :conn-id="tab.connId" />
           </div>
         </template>
@@ -43,7 +44,7 @@
 
       <!-- 文件面板拖拽分隔线 -->
       <div
-        v-if="tabsStore.tabs.length > 0"
+        v-if="showFilePanel"
         class="panel-resizer"
         @mousedown.prevent="startPanelResize"
       />
@@ -65,6 +66,7 @@
           @toggle-tunnel="showTunnel = !showTunnel"
           @toggle-local-term="toggleLocalTerm"
           @new-tab="showConnectDialog = true"
+          @new-serial="showSerialDialog = true"
           @reconnect="reconnect"
           @duplicate="duplicateTab"
         />
@@ -138,7 +140,7 @@
           @connect="onConnectSession"
           @edit="openEditSession"
         />
-        <div v-if="showMonitor && tabsStore.activeConnId" class="monitor-inline">
+        <div v-if="showMonitor && tabsStore.activeConnId && tabsStore.activeTab?.kind !== 'serial'" class="monitor-inline">
           <MonitorPanel
             :conn-id="tabsStore.activeConnId"
             @close="showMonitor = false"
@@ -158,6 +160,13 @@
       @cancel="showConnectDialog = false"
     />
 
+    <!-- ─── 串口连接对话框 ─────────────────────────────────────── -->
+    <SerialConnectDialog
+      v-if="showSerialDialog"
+      @connected="onSerialConnected"
+      @cancel="showSerialDialog = false"
+    />
+
     <!-- ─── 新建/编辑会话对话框 ───────────────────────────────── -->
     <SessionDialog
       v-if="showSessionDialog"
@@ -175,7 +184,7 @@
     />
 
     <!-- ─── 端口转发模态框 ─────────────────────────────────── -->
-    <div v-if="showTunnel && tabsStore.activeConnId" class="tunnel-overlay" @click.self="showTunnel = false">
+    <div v-if="showTunnel && tabsStore.activeConnId && tabsStore.activeTab?.kind !== 'serial'" class="tunnel-overlay" @click.self="showTunnel = false">
       <div class="tunnel-wrap">
         <TunnelPanel
           :conn-id="tabsStore.activeConnId"
@@ -208,7 +217,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
-import { Connect, Disconnect, SendInput, RespondHostKey } from '../wailsjs/go/main/App'
+import { Connect, Disconnect, SendInput, RespondHostKey, SerialConnect } from '../wailsjs/go/main/App'
 import { EventsOn, EventsOff, WindowMinimise, WindowToggleMaximise, Quit } from '../wailsjs/runtime/runtime'
 import Terminal         from './components/Terminal.vue'
 import FileManager      from './components/FileManager.vue'
@@ -216,6 +225,7 @@ import TunnelPanel      from './components/TunnelPanel.vue'
 import MonitorPanel     from './components/MonitorPanel.vue'
 import SnippetDialog    from './components/SnippetDialog.vue'
 import ConnectDialog    from './components/ConnectDialog.vue'
+import SerialConnectDialog from './components/SerialConnectDialog.vue'
 import SessionDialog    from './components/SessionDialog.vue'
 import SessionSidebar   from './components/SessionSidebar.vue'
 import SettingsDialog   from './components/SettingsDialog.vue'
@@ -229,7 +239,7 @@ import HelpPanel        from './components/HelpPanel.vue'
 import CommandPalette   from './components/CommandPalette.vue'
 import TransferFooter   from './components/TransferFooter.vue'
 import { useSessionsStore, type Session } from './stores/sessions'
-import { useTabsStore, type ConnectRequest } from './stores/tabs'
+import { useTabsStore, type ConnectRequest, type SerialConnectRequest } from './stores/tabs'
 import { useSettingsStore } from './stores/settings'
 import { useSnippetsStore } from './stores/snippets'
 import { useDialogStore }   from './stores/dialogs'
@@ -252,9 +262,11 @@ function onTitleDblClick(e: MouseEvent) {
 }
 
 // 标题栏连接摘要：当前激活连接的 用户@会话名 · 主机
+// 标题栏连接摘要：当前激活连接的 用户@会话名 · 主机；串口会话显示端口@波特率
 const connSummary = computed(() => {
   const t = tabsStore.tabs.find(tb => tb.connId === tabsStore.activeConnId)
   if (!t || t.status !== 'connected') return ''
+  if (t.kind === 'serial') return t.lastSerialReq ? `串口 · ${t.lastSerialReq.port} · ${t.lastSerialReq.baud_rate}` : '串口'
   const sess = t.sessionId ? sessionsStore.sessions.find(s => s.id === t.sessionId) : null
   const host = sess?.host || t.lastConnectReq?.host || ''
   const user = sess?.username || t.lastConnectReq?.username || ''
@@ -305,6 +317,11 @@ const filePanelWidth = ref(
   parseInt(localStorage.getItem('file-panel-width') ?? String(FILE_PANEL_DEFAULT), 10)
 )
 
+// 文件面板仅在当前活跃 tab 为 SSH 会话时显示（串口会话无 SFTP）
+const showFilePanel = computed(() =>
+  tabsStore.tabs.length > 0 && tabsStore.activeTab?.kind !== 'serial'
+)
+
 function startPanelResize(e: MouseEvent) {
   const startX = e.clientX
   const startW = filePanelWidth.value
@@ -322,6 +339,7 @@ function startPanelResize(e: MouseEvent) {
 
 // ─── 对话框 / 面板状态 ──────────────────────────────────────────
 const showConnectDialog = ref(false)
+const showSerialDialog  = ref(false)
 const showSessionDialog = ref(false)
 const showSettings      = ref(false)
 const showTunnel        = ref(false)
@@ -434,6 +452,12 @@ function onQuickConnected(connId: string, label: string) {
   tabsStore.openTab(connId, label)
 }
 
+// 串口连接成功：开 tab（kind=serial，无 SFTP/监控/隧道）
+function onSerialConnected(connId: string, label: string, req: SerialConnectRequest) {
+  showSerialDialog.value = false
+  tabsStore.openTab(connId, label, undefined, undefined, 'serial', req)
+}
+
 /** 命令面板触发的连接 */
 async function onPaletteConnect(sessionId: string) {
   const sess = sessionsStore.sessions.find(s => s.id === sessionId)
@@ -482,12 +506,19 @@ watch(() => tabsStore.tabs.map(t => t.connId), (curr, prev) => {
 
 async function reconnect(connId: string) {
   const tab = tabsStore.tabs.find(t => t.connId === connId)
-  if (!tab?.lastConnectReq) return
+  if (!tab) return
   // 先标记为重连中，再断开（Terminal 收到 closed 事件时检查此状态以跳过断线遮罩）
   tabsStore.setStatus(connId, 'connecting')
   await Disconnect(connId).catch(() => {})
   try {
-    const newConnId = await Connect(tab.lastConnectReq, 120, 30)
+    let newConnId: string
+    if (tab.kind === 'serial') {
+      if (!tab.lastSerialReq) { tabsStore.setStatus(connId, 'closed'); return }
+      newConnId = await SerialConnect(tab.lastSerialReq)
+    } else {
+      if (!tab.lastConnectReq) { tabsStore.setStatus(connId, 'closed'); return }
+      newConnId = await Connect(tab.lastConnectReq, 120, 30)
+    }
     const idx = tabsStore.tabs.findIndex(t => t.connId === connId)
     if (idx !== -1) {
       tabsStore.tabs[idx].connId = newConnId
@@ -502,10 +533,17 @@ async function reconnect(connId: string) {
 
 async function duplicateTab(connId: string) {
   const tab = tabsStore.tabs.find(t => t.connId === connId)
-  if (!tab?.lastConnectReq) return
+  if (!tab) return
   try {
-    const newConnId = await Connect(tab.lastConnectReq, 120, 30)
-    tabsStore.openTab(newConnId, tab.label, tab.sessionId, tab.lastConnectReq)
+    if (tab.kind === 'serial') {
+      if (!tab.lastSerialReq) return
+      const newConnId = await SerialConnect(tab.lastSerialReq)
+      tabsStore.openTab(newConnId, tab.label, undefined, undefined, 'serial', tab.lastSerialReq)
+    } else {
+      if (!tab.lastConnectReq) return
+      const newConnId = await Connect(tab.lastConnectReq, 120, 30)
+      tabsStore.openTab(newConnId, tab.label, tab.sessionId, tab.lastConnectReq)
+    }
   } catch (e: any) {
     dialogStore.error('连接失败：' + String(e))
   }

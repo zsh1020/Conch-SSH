@@ -43,6 +43,7 @@
         <span class="tab-underline"></span>
       </div>
       <button class="tab-new" title="新建连接 (Ctrl+T)" @click="$emit('new-tab')"><i class="ph ph-plus"></i></button>
+      <button class="tab-new" title="串口连接" @click="$emit('new-serial')"><i class="ph ph-usb"></i></button>
     </div>
 
     <!-- 右滚动箭头 -->
@@ -60,8 +61,10 @@
         />
       </div>
       <button class="tab-tool-btn" :class="{ active: broadcastActive }" title="批量广播" @click="$emit('toggle-broadcast')"><i class="ph ph-broadcast"></i></button>
-      <button class="tab-tool-btn" :class="{ active: showMonitor }" title="服务器监控" @click="$emit('toggle-monitor')"><i class="ph ph-pulse"></i></button>
-      <button class="tab-tool-btn" :class="{ active: showTunnel }" title="端口转发" @click="$emit('toggle-tunnel')"><i class="ph ph-link"></i></button>
+      <template v-if="tabsStore.activeTab?.kind !== 'serial'">
+        <button class="tab-tool-btn" :class="{ active: showMonitor }" title="服务器监控" @click="$emit('toggle-monitor')"><i class="ph ph-pulse"></i></button>
+        <button class="tab-tool-btn" :class="{ active: showTunnel }" title="端口转发" @click="$emit('toggle-tunnel')"><i class="ph ph-link"></i></button>
+      </template>
       <button class="tab-tool-btn" :class="{ active: showLocalTerm }" title="本地终端 (Ctrl+`)" @click="$emit('toggle-local-term')"><i class="ph ph-terminal-window"></i></button>
     </div>
   </div>
@@ -81,12 +84,12 @@
     >
       <div
         class="tab-ctx-item"
-        :class="{ disabled: !tabCtx.tab.lastConnectReq }"
+        :class="{ disabled: !tabCtx.tab.lastConnectReq && !tabCtx.tab.lastSerialReq }"
         @click="onCtxDuplicate"
       >复制</div>
       <div
         class="tab-ctx-item"
-        :class="{ disabled: !tabCtx.tab.lastConnectReq }"
+        :class="{ disabled: !tabCtx.tab.lastConnectReq && !tabCtx.tab.lastSerialReq }"
         @click="onCtxReconnect"
       >重新连接</div>
       <div class="tab-ctx-divider" />
@@ -116,6 +119,7 @@ const emit = defineEmits<{
   (e: 'toggle-tunnel'):    void
   (e: 'toggle-local-term'): void
   (e: 'new-tab'): void
+  (e: 'new-serial'): void
   (e: 'reconnect', connId: string): void
   (e: 'duplicate', connId: string): void
 }>()
@@ -222,13 +226,13 @@ function onCtxClose() {
 function onCtxReconnect() {
   const tab = tabCtx.value.tab
   tabCtx.value.tab = null
-  if (tab?.lastConnectReq) emit('reconnect', tab.connId)
+  if (tab?.lastConnectReq || tab?.lastSerialReq) emit('reconnect', tab.connId)
 }
 
 function onCtxDuplicate() {
   const tab = tabCtx.value.tab
   tabCtx.value.tab = null
-  if (tab?.lastConnectReq) emit('duplicate', tab.connId)
+  if (tab?.lastConnectReq || tab?.lastSerialReq) emit('duplicate', tab.connId)
 }
 </script>
 

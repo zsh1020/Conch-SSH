@@ -170,11 +170,15 @@ func (a *App) Connect(req ConnectRequest, cols, rows uint32) (string, error) {
 	return connID, nil
 }
 
-// SendInput sends terminal input to the remote shell.
+// SendInput sends terminal input to the remote shell (or serial port).
 func (a *App) SendInput(connID, data string) error {
 	entry := a.getConn(connID)
 	if entry == nil {
 		return fmt.Errorf("connection %s not found", connID)
+	}
+	if entry.serial != nil {
+		_, err := entry.serial.Write([]byte(data))
+		return err
 	}
 	return entry.session.Write([]byte(data))
 }
@@ -189,13 +193,18 @@ func (a *App) SendInputBase64(connID, data string) error {
 	if err != nil {
 		return err
 	}
+	if entry.serial != nil {
+		_, err = entry.serial.Write(decoded)
+		return err
+	}
 	return entry.session.Write(decoded)
 }
 
 // ResizeTerminal sends a window-change to the remote PTY.
+// Serial ports have no window size; this is a no-op for them.
 func (a *App) ResizeTerminal(connID string, cols, rows uint32) error {
 	entry := a.getConn(connID)
-	if entry == nil {
+	if entry == nil || entry.serial != nil {
 		return nil
 	}
 	return entry.session.Resize(cols, rows)
@@ -230,6 +239,9 @@ func (a *App) Disconnect(connID string) error {
 
 	if !ok {
 		return nil
+	}
+	if entry.serial != nil {
+		return entry.serial.Close()
 	}
 	entry.tunnels.StopAll()
 	if entry.sftpClient != nil {

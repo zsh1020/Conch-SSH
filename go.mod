@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/pkg/sftp v1.13.10
 	github.com/wailsapp/wails/v2 v2.12.0
+	go.bug.st/serial v1.8.0
 	golang.org/x/crypto v0.51.0
 )
 

@@ -46,7 +46,16 @@ const files  = await SFTPList(connID, '/home')
 | `StopLocalTerm` | `(id: string) → Promise<void>` | 关闭指定本地终端。 |
 | `StopAllLocalTerms` | `() → Promise<void>` | 关闭全部本地终端（app 退出时自动调用）。 |
 
-## 3. SFTP 文件操作 `app_sftp.go`
+## 3. 串口连接 `app_serial.go` / `backend/serial`
+
+串口会话复用终端通道：输出经 `terminal:output:{connID}`（base64）推送，断开经 `terminal:closed:{connID}` 通知；输入复用 `SendInput` / `SendInputBase64`，断开复用 `Disconnect`。串口会话无 PTY（`ResizeTerminal` 为空操作），也不支持 SFTP / 监控 / 端口转发。
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `SerialListPorts` | `() → Promise<PortInfo[]>` | 枚举本机串口。`PortInfo` 含 `name`（如 `COM3`）与 `description`（设备友好名，如 `Silicon Labs CP210x USB to UART Bridge`，可能为空）。 |
+| `SerialConnect` | `(req: SerialConnectRequest) → Promise<string>` | 打开串口并返回 `connID`。`req` 字段：`port`、`baud_rate`、`data_bits`（5-8）、`parity`（`none`/`odd`/`even`）、`stop_bits`（`1`/`1.5`/`2`）。连接成功打印本地状态行并自动发送一个 `\r` 唤醒对端控制台。 |
+
+## 4. SFTP 文件操作 `app_sftp.go`
 
 SFTP 子系统对每个连接懒加载。传输类方法立即返回 `transferID`，进度经事件推送。
 
@@ -67,7 +76,7 @@ SFTP 子系统对每个连接懒加载。传输类方法立即返回 `transferID
 | `SFTPCancelTransfer` | `(transferID: string) → Promise<void>` | 取消进行中的传输。 |
 | `SFTPReadFile` | `(connID, remotePath: string, maxBytes: number) → Promise<string>` | 读取文件前 `maxBytes` 字节（≤0 默认 512KB），返回 base64。用于预览。 |
 
-## 4. 会话与分组 `app_misc.go`
+## 5. 会话与分组 `app_misc.go`
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -81,7 +90,7 @@ SFTP 子系统对每个连接懒加载。传输类方法立即返回 `transferID
 | `ReorderSessions` | `(ids: string[]) → Promise<void>` | 持久化会话排序。 |
 | `ImportSSHConfig` | `() → Promise<number>` | 从 `~/.ssh/config` 导入，返回导入数量。 |
 
-## 5. 命令片段 `app_misc.go`
+## 6. 命令片段 `app_misc.go`
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -89,14 +98,14 @@ SFTP 子系统对每个连接懒加载。传输类方法立即返回 `transferID
 | `SaveSnippet` | `(sn: Snippet) → Promise<void>` | 新建或更新片段。 |
 | `DeleteSnippet` | `(id: string) → Promise<void>` | 删除片段。 |
 
-## 6. 设置 `app_misc.go`
+## 7. 设置 `app_misc.go`
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
 | `GetSettings` | `() → Promise<Settings>` | 读取全局设置。 |
 | `SaveSettings` | `(s: Settings) → Promise<void>` | 保存全局设置（JSON 持久化）。 |
 
-## 7. 端口转发 `app_misc.go`
+## 8. 端口转发 `app_misc.go`
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -107,14 +116,14 @@ SFTP 子系统对每个连接懒加载。传输类方法立即返回 `transferID
 | `UpdateSavedTunnels` | `(connID: string, rules: TunnelRule[]) → Promise<void>` | 用显式列表替换保存的隧道规则。 |
 | `SaveSessionTunnels` | `(connID: string) → Promise<void>` | 把当前运行的隧道持久化到关联会话。 |
 
-## 8. 服务器监控 `app_monitor.go`
+## 9. 服务器监控 `app_monitor.go`
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
 | `StartMonitor` | `(connID: string) → Promise<void>` | 每 1 秒采样一次，经 `monitor:stats:{connID}` 推送 CPU/内存/网络/磁盘/温度。 |
 | `StopMonitor` | `(connID: string) → Promise<void>` | 停止采样。 |
 
-## 9. 本地文件系统 `app_misc.go`
+## 10. 本地文件系统 `app_misc.go`
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -124,7 +133,7 @@ SFTP 子系统对每个连接懒加载。传输类方法立即返回 `transferID
 | `LocalIsDir` | `(path: string) → Promise<boolean>` | 是否为目录。 |
 | `LocalQuickDirs` | `() → Promise<QuickDir[]>` | 标准用户目录（桌面/文档/下载/…，仅返回存在的）。 |
 
-## 10. 编辑器集成 `app_editor.go`
+## 11. 编辑器集成 `app_editor.go`
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -133,7 +142,7 @@ SFTP 子系统对每个连接懒加载。传输类方法立即返回 `transferID
 | `UploadEditedFileSudo` | `(connID, watchID, sudoPassword: string) → Promise<void>` | 目标文件无写权限时的 sudo 提权保存：临时文件经 SFTP 传到 `/tmp` 后用 `sudo cp` 覆盖目标。`sudoPassword` 传空串可复用缓存的密码（首次成功后在连接存活期内有效）；错误前缀 `sudo password required` 表示需要密码，`sudo auth failed` 表示认证失败。 |
 | `StopEditorWatch` | `(watchID: string) → Promise<void>` | 停止监听并清理临时副本。 |
 
-## 11. 系统对话框 `app_editor.go` / `app_dialog*.go`
+## 12. 系统对话框 `app_editor.go` / `app_dialog*.go`
 
 | 方法 | 签名 | 说明 |
 |------|------|------|
@@ -144,7 +153,7 @@ SFTP 子系统对每个连接懒加载。传输类方法立即返回 `transferID
 | `OpenLocalPath` | `(path: string) → Promise<void>` | 用系统默认程序打开本地文件/目录（下载完成后点击打开）。 |
 | `RevealLocalPath` | `(path: string) → Promise<void>` | 在系统文件管理器中定位该文件（Win/Mac 选中，Linux 打开所在目录）。 |
 
-## 12. 密钥与杂项
+## 13. 密钥与杂项
 
 | 方法 | 签名 | 文件 | 说明 |
 |------|------|------|------|
